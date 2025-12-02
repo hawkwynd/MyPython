@@ -4,25 +4,40 @@ import time
 import threading
 import tkinter as tk
 from tkinter import StringVar
+from datetime import datetime
 
 # === CONFIG ===
 JOURNAL_FOLDER = os.path.expanduser(
     "~/Saved Games/Frontier Developments/Elite Dangerous/"
 )
-JOURNAL_PREFIX = "Journal.2025-11-"
+
+# Get the current datetime object
+now = datetime.now()
+
+# Extract the month as an integer (1-12)
+current_month_number = now.month
+# Extract todays date day as an integer (1-31)
+current_day = now.day 
+
+# Journal.2025-11-18xxxxxxxx.log (limit to todays logs, else we're loading the whole months worth...)
+JOURNAL_PREFIX = f"Journal.2025-{current_month_number}-{current_day}"
+
+# JOURNAL_PREFIX = f"Journal.2025-{current_month_number}-"
+
+# The targeted biological genus.
 TARGET_GENUS = "Radicoida"
 
 # === PER-COMMANDER COUNTERS ===
-# commanders[name] = {"on_hand": int, "submitted": int}
 commanders = {}
 
 # Track processed lines
 processed = set()
 
+
 # === DRAGGABLE OVERLAY ===
 def create_overlay():
     root = tk.Tk()
-    root.title("My test App")
+    root.title("Genus Sampler for Radicoida")
     root.attributes("-topmost", True)
     root.overrideredirect(True)
     root.attributes("-alpha", 0.80)
@@ -33,18 +48,17 @@ def create_overlay():
     # Esc key exits the application
     root.bind("<Escape>", lambda e: root.destroy())
 
-
     var = StringVar()
-    var.set("Jumps remaining (no data yet)")
+    var.set( JOURNAL_PREFIX )
 
     label = tk.Label(
         root,
         textvariable=var,
         font=("Euro Caps", 12, "normal"),
-        fg="lime",
+        fg="cyan",
         bg="black",
-        padx=20,      # widened
-        pady=10,
+        padx=40,      # widened
+        pady=20,
         justify="left",
         anchor="w",   # align text left
     )
@@ -71,11 +85,9 @@ def scan_journals(var):
 
     global commanders
     current_cmr = None
-    RemainingJumpsInRoute = 0 
-    SystemName = PlanetClass = BodyName = "Unknown"
-    BodyCount = 0
-    Landable = False 
-        
+    curSystem = None
+    jumpsRemaining = 0
+    JumpDist = 0
     
     while True:
 			
@@ -108,16 +120,27 @@ def scan_journals(var):
 
                         ev = event.get("event")
                         sampleName = ""
-						
+                        
+                        # FSDTarget
+                        if ev == "FSDTarget":
+                            jumpsRemaining = event.get("RemainingJumpsInRoute")
+
+
+                        # === grab system name when jumping into it ===
+                        if ev == "FSDJump":
+                             curSystem = event.get("StarSystem")
+                             JumpDist = round( event.get("JumpDist") )
+											
                         
                         # === Detect commander via LoadGame ===
                         if ev == "LoadGame":
                             cmr = event.get("Commander")
                             
                             if cmr:
-                                current_cmr = cmr
+                                current_cmr = cmr.title()
+
                                 if cmr not in commanders:
-                                    commanders[cmr] = {"on_hand": 0, "submitted": 0, "jumpsLeft": 0, "samples": 0 }
+                                    commanders[cmr] = {"on_hand": 0, "submitted": 0, "samples": 0 }
                             continue
 
                         # === Skip until LoadGame detected ===
@@ -126,12 +149,12 @@ def scan_journals(var):
 
                         # === Add commander to commander list ===
                         if current_cmr not in commanders:
-                            commanders[current_cmr] = {"on_hand": 0, "submitted": 0, "jumpsLeft": 0, "samples": 0}
+                            commanders[current_cmr] = {"on_hand": 0, "submitted": 0,"samples": 0}
 
                         # === Get Current Commander Data===
                         cmrdata = commanders[current_cmr]
                         
-						# === Sample scan === 
+						# === Sample scan in gun === 
                         if (event.get("ScanType") == "Log" or event.get("ScanType") == "Sample" and event.get("Genus_Localised") == TARGET_GENUS):
                             cmrdata["samples"] += 1
                         						
@@ -143,7 +166,7 @@ def scan_journals(var):
                                 # reset gun sample count
                                 cmrdata["samples"] = 0
 
-                        # === SellOrganicData ===
+                        # === SellOrganicData reset variables ===
                         if ev == "SellOrganicData":
                             cmrdata["submitted"] += cmrdata["on_hand"]
                             cmrdata["on_hand"] = 0
@@ -152,11 +175,13 @@ def scan_journals(var):
                                
                         # === Update overlay text ===
                         var.set(
-                            f"{current_cmr} {TARGET_GENUS}\n"
-                            f"Submitted: {cmrdata['submitted']}\n"
-                            f"On-hand: {cmrdata['on_hand']}\n"
-                            f"Samples: {cmrdata['samples']} of 3\n"
-                            f"Esc to Exit"
+                            # f"{current_cmr} {TARGET_GENUS} Tracker\n\n"
+                            f"Location: {curSystem}\n"
+                            f"Distance this jump: {JumpDist}ly\n"
+                            # f"Total submitted: {cmrdata['submitted']}\n"
+                            # f"Samples To Turn in: {cmrdata['on_hand']}\n"
+                            # f"Samples In-Gun: {cmrdata['samples']} of 3\n"
+                            f"Jumps Remaining in route: {jumpsRemaining}"
                         )
 
             time.sleep(1)
@@ -169,6 +194,6 @@ def scan_journals(var):
 # === MAIN ===
 if __name__ == "__main__":
     root, var = create_overlay()
-    t = threading.Thread(target=scan_journals, args=(var,), daemon=True)
+    t = threading.Thread( target=scan_journals, args=(var,), daemon=True)
     t.start()
     root.mainloop()

@@ -22,7 +22,7 @@ current_day_with_leading_zero = now.strftime('%d')
 
 # Journal.2025-11-18xxxxxxxx.log (limit to todays logs, else we're loading the whole months worth...)
 # JOURNAL_PREFIX = f"Journal.2025-{current_month_number}-{current_day}"
-JOURNAL_PREFIX = f"Journal.2025-{current_month_number}-{current_day_with_leading_zero}T"
+JOURNAL_PREFIX = f"Journal.2025-{current_month_number}-"
 
 # Track processed lines
 processed = set()

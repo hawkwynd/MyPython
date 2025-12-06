@@ -83,7 +83,8 @@ def scan_journals():
 
                         ev = event.get("event")
 
-                        if ev == "SAASignalsFound" and "Shrogaae" in event.get("BodyName") :
+                        # if ev == "SAASignalsFound" and "Shrogaae" in event.get("BodyName") :
+                        if ev == "SAASignalsFound":
                             
                             signals = event.get("Signals")
                             BodyName = event.get("BodyName")

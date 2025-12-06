@@ -18,11 +18,12 @@ now = datetime.now()
 current_month_number = now.month
 # Extract todays date day as an integer (1-31)
 current_day = now.day 
+current_day_with_leading_zero = now.strftime('%d')
 
 # Journal.2025-11-18xxxxxxxx.log (limit to todays logs, else we're loading the whole months worth...)
-JOURNAL_PREFIX = f"Journal.2025-{current_month_number}-{current_day}"
+# JOURNAL_PREFIX = f"Journal.2025-{current_month_number}-{current_day}"
 
-# JOURNAL_PREFIX = f"Journal.2025-{current_month_number}-"
+JOURNAL_PREFIX = f"Journal.2025-{current_month_number}-{current_day_with_leading_zero}"
 
 # The targeted biological genus.
 TARGET_GENUS = "Radicoida"
@@ -88,7 +89,10 @@ def scan_journals(var):
     curSystem = None
     jumpsRemaining = 0
     JumpDist = 0
-    
+    StarClass = ""
+    NextSystemName = ""
+    Population = 0
+
     while True:
 			
         try:
@@ -119,70 +123,30 @@ def scan_journals(var):
                             continue
 
                         ev = event.get("event")
-                        sampleName = ""
+                       
                         
                         # FSDTarget
                         if ev == "FSDTarget":
+
                             jumpsRemaining = event.get("RemainingJumpsInRoute")
+                            NextSystemName = event.get("Name")
+                            # print(NextSystemName)
+                            StarClass = event.get("StarClass")
 
 
                         # === grab system name when jumping into it ===
                         if ev == "FSDJump":
                              curSystem = event.get("StarSystem")
                              JumpDist = round( event.get("JumpDist") )
+                             Population = event.get("Population")
 											
-                        
-                        # === Detect commander via LoadGame ===
-                        if ev == "LoadGame":
-                            cmr = event.get("Commander")
-                            
-                            if cmr:
-                                current_cmr = cmr.title()
-
-                                if cmr not in commanders:
-                                    commanders[cmr] = {"on_hand": 0, "submitted": 0, "samples": 0 }
-                            continue
-
-                        # === Skip until LoadGame detected ===
-                        if not current_cmr:
-                            continue  
-
-                        # === Add commander to commander list ===
-                        if current_cmr not in commanders:
-                            commanders[current_cmr] = {"on_hand": 0, "submitted": 0,"samples": 0}
-
-                        # === Get Current Commander Data===
-                        cmrdata = commanders[current_cmr]
-                        
-						# === Sample scan in gun === 
-                        if (event.get("ScanType") == "Log" or event.get("ScanType") == "Sample" and event.get("Genus_Localised") == TARGET_GENUS):
-                            cmrdata["samples"] += 1
-                        						
-                        # === Analyse scan ===
-                        if ev == "ScanOrganic":
-                            if (event.get("ScanType") == "Analyse" and
-                                event.get("Genus_Localised") == TARGET_GENUS):
-                                cmrdata["on_hand"] += 1
-                                # reset gun sample count
-                                cmrdata["samples"] = 0
-
-                        # === SellOrganicData reset variables ===
-                        if ev == "SellOrganicData":
-                            cmrdata["submitted"] += cmrdata["on_hand"]
-                            cmrdata["on_hand"] = 0
-                            cmrdata["samples"] = 0
-
-                               
                         # === Update overlay text ===
                         var.set(
-                            # f"{current_cmr} {TARGET_GENUS} Tracker\n\n"
-                            f"Location: {curSystem}\n"
-                            f"Distance this jump: {JumpDist}ly\n"
-                            # f"Total submitted: {cmrdata['submitted']}\n"
-                            # f"Samples To Turn in: {cmrdata['on_hand']}\n"
-                            # f"Samples In-Gun: {cmrdata['samples']} of 3\n"
-                            f"Jumps Remaining in route: {jumpsRemaining}"
-                        )
+                            f"Location: {curSystem} ({JumpDist}ly)\n"
+                            f"Population: {Population}\n"
+                            f"Next: {NextSystemName} ({StarClass})\n"
+                            f"Jumps remaining: {jumpsRemaining}"
+                        )   
 
             time.sleep(1)
 

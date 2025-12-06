@@ -1,10 +1,12 @@
-# api call to edastro, obtain all rare POIs from API
+# ====================================================================
+# My little python script to make an api call to edastro, obtain all POIs 
+# store them by region in a text file in the gec_by_region directory
+# ====================================================================
 
 import requests
 import json
 import os 
 import sys
-
 
 regionWanted = []
 DATAFOLDER = "./gec_by_region"
@@ -12,8 +14,7 @@ DATAFOLDER = "./gec_by_region"
 # create data folder if not exists
 os.makedirs(DATAFOLDER, exist_ok=True )
 
-
-# flush data folder of txt files before creating new ones.
+# flush data folder of txt and json files before creating new ones.
 try:
     for filename in os.listdir(DATAFOLDER):
         if filename.endswith(".txt") or filename.endswith(".json"):
@@ -28,8 +29,8 @@ except Exception as e:
 # call edastro api and overwrite .json file in data directory
 try:
 
-    # response = requests.get("https://edastro.com/gec/json/rare")
-    response = requests.get("https://edastro.com/gec/json/all")
+    response = requests.get("https://edastro.com/gec/json/rare")
+    # response = requests.get("https://edastro.com/gec/json/all")
     
     if response.status_code == 200:
         data = response.json()
@@ -82,3 +83,5 @@ for region in my_regions:
                 p.write(f"{str(index)} Region: {item['region']}\nSystem: {item['galMapSearch']}\nName: {item['name']}\nRating: {item['rating']} Type: {item['type']}\nSummary: {item['summary']}\n\n")
 
             index += 1
+
+print(f"All done. Check the {DATAFOLDER} folder for a list of files.")

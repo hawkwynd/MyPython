@@ -1,0 +1,117 @@
+[
+    {
+        "macAddress": "F8:B3:B7:81:EB:54",
+        "lastData": {
+            "dateutc": 1768408440000,
+            "tempf": 45,
+            "humidity": 94,
+            "windspeedmph": 3.58,
+            "windgustmph": 4.47,
+            "maxdailygust": 10.29,
+            "winddir": 257,
+            "winddir_avg10m": 252,
+            "uv": 0,
+            "solarradiation": 71.91,
+            "hourlyrainin": 0,
+            "eventrainin": 0.08,
+            "dailyrainin": 0.08,
+            "weeklyrainin": 0.08,
+            "monthlyrainin": 0.54,
+            "yearlyrainin": 0.54,
+            "battout": 1,
+            "tempinf": 70.2,
+            "humidityin": 43,
+            "baromrelin": 28.821,
+            "baromabsin": 28.821,
+            "battin": 1,
+            "feelsLike": 43.46,
+            "dewPoint": 43.38,
+            "feelsLikein": 68.9,
+            "dewPointin": 46.6,
+            "lastRain": "2026-01-14T15:58:00.000Z",
+            "tz": "America/Chicago",
+            "date": "2026-01-14T16:34:00.000Z"
+        },
+        "info": {
+            "name": "Fleming Farm",
+            "coords": {
+                "coords": {
+                    "lat": 36.5684,
+                    "lon": -86.3786
+                },
+                "address": "2718 Oak Grove Church Rd, Bethpage, TN 37022, USA",
+                "location": "Bethpage",
+                "elevation": 270.9602661132812,
+                "address_components": [
+                    {
+                        "long_name": "2718",
+                        "short_name": "2718",
+                        "types": [
+                            "street_number"
+                        ]
+                    },
+                    {
+                        "long_name": "Oak Grove Church Road",
+                        "short_name": "Oak Grove Church Rd",
+                        "types": [
+                            "route"
+                        ]
+                    },
+                    {
+                        "long_name": "Bethpage",
+                        "short_name": "Bethpage",
+                        "types": [
+                            "locality",
+                            "political"
+                        ]
+                    },
+                    {
+                        "long_name": "Sumner County",
+                        "short_name": "Sumner County",
+                        "types": [
+                            "administrative_area_level_2",
+                            "political"
+                        ]
+                    },
+                    {
+                        "long_name": "Tennessee",
+                        "short_name": "TN",
+                        "types": [
+                            "administrative_area_level_1",
+                            "political"
+                        ]
+                    },
+                    {
+                        "long_name": "United States",
+                        "short_name": "US",
+                        "types": [
+                            "country",
+                            "political"
+                        ]
+                    },
+                    {
+                        "long_name": "37022",
+                        "short_name": "37022",
+                        "types": [
+                            "postal_code"
+                        ]
+                    },
+                    {
+                        "long_name": "1906",
+                        "short_name": "1906",
+                        "types": [
+                            "postal_code_suffix"
+                        ]
+                    }
+                ],
+                "geo": {
+                    "type": "Point",
+                    "coordinates": [
+                        -86.3786,
+                        36.5684
+                    ]
+                }
+            }
+        }
+    }
+]

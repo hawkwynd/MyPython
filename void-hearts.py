@@ -1,4 +1,3 @@
-import keyboard
 import sys
 import os
 import json
@@ -12,6 +11,8 @@ from datetime import datetime
 JOURNAL_FOLDER = os.path.expanduser(
     "~/Saved Games/Frontier Developments/Elite Dangerous/"
 )
+
+OUTPUTFILE = "./PlatinumHots.json"
 
 # Get the current datetime object
 now = datetime.now()
@@ -27,10 +28,7 @@ JOURNAL_PREFIX = f"Journal.2025-"
 # Track processed lines
 processed = set()
 
-def exit_script():
-
-    print("Exiting script...")
-    sys.exit(0)  # Exit the program with a success status
+platinums = []
 
 
 # === JOURNAL SCANNER ===
@@ -91,8 +89,12 @@ def scan_journals():
                             
                             if "Ring" in BodyName:
                                 for s in signals:
-
-                                    print(f"{ev} {date_object}: {BodyName} {s['Type']}:{s['Count']}" )
+                                    if "Platinum" in s['Type']:
+                                        # print(f"{date_object}: {BodyName} {s['Type']}:{s['Count']}" )
+                                        
+                                        # recordArray = {"SystemBody": BodyName, "PlatHotSpots": s['Count']}
+                                        recordArray = f"{BodyName},{s['Count']}"
+                                        platinums.append( recordArray )
 
             # time.sleep(1)
 
@@ -100,8 +102,17 @@ def scan_journals():
          print("Error:", e)
          time.sleep(2)
 
-keyboard.add_hotkey('esc', exit_script)
+# keyboard.add_hotkey('esc', exit_script)
 
 print("scanning your journal files...")
 
 scan_journals()
+
+# convert to list json
+# json_string = json.dumps(list(platinums))
+unique_list = list(set(platinums))
+
+with open(OUTPUTFILE, 'w') as json_file:
+     json.dump(unique_list, json_file, indent=4)
+
+print(f"{OUTPUTFILE} is written." )     

@@ -45,6 +45,7 @@ def scanJournals():
                 if f.startswith( JOURNAL_PREFIX )
             ]
             
+            body = ""
             files.sort()
 
             for fname in files:
@@ -66,15 +67,29 @@ def scanJournals():
                             continue
 
                         ev = event.get("event")
+
+                        if ev == "SupercruiseExit":
+                            body = event.get("Body")
+
                         
                         if ev == "ProspectedAsteroid":
+
                             materials = event.get("Materials")
-                            # print(materials)
+
+                            # with open("./dataPuke.txt", 'a', encoding="utf-8") as p:
+                                # p.write(f"{path}\n")
+
                             for m in materials:
                                 if m['Name'] == "tritium":
                                     content = event.get("Content_Localised")
                                     prop = round_up_to_two_decimals(m['Proportion'])
-                                    print(f"Tritium: {prop}% {content}" )
+
+                                    print(f"{body} - Tritium: {prop}% {content}" )
+
+                                    # append to txt file
+                                    # p.write(f"{body} Tritium: {prop}% {content}\n")
+
+
 
         except Exception as e:
             print("Error:", e)

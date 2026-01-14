@@ -1,0 +1,23 @@
+{
+    "timestamp": "2025-12-23T15:39:21Z",
+    "event": "Scan",
+    "ScanType": "AutoScan",
+    "BodyName": "Leamao JY-P d6-2684",
+    "BodyID": 0,
+    "StarSystem": "Leamao JY-P d6-2684",
+    "SystemAddress": 92232635846971,
+    "DistanceFromArrivalLS": 0.0,
+    "StarType": "N",
+    "Subclass": 0,
+    "StellarMass": 0.5625,
+    "Radius": 12128.90625,
+    "AbsoluteMagnitude": 5.248856,
+    "Age_MY": 3330,
+    "SurfaceTemperature": 7480932.0,
+    "Luminosity": "VII",
+    "RotationPeriod": 1.577935,
+    "AxialTilt": 0.0,
+    "WasDiscovered": True,
+    "WasMapped": False,
+    "WasFootfalled": False
+}

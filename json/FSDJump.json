@@ -1,0 +1,29 @@
+{
+    "timestamp": "2025-12-22T22:23:58Z",
+    "event": "FSDJump",
+    "Taxi": false,
+    "Multicrew": false,
+    "StarSystem": "Ogainks MH-D d12-8019",
+    "SystemAddress": 275541722681707,
+    "StarPos": [
+        2360.0,
+        57.5625,
+        20516.1875
+    ],
+    "SystemAllegiance": "",
+    "SystemEconomy": "$economy_None;",
+    "SystemEconomy_Localised": "None",
+    "SystemSecondEconomy": "$economy_None;",
+    "SystemSecondEconomy_Localised": "None",
+    "SystemGovernment": "$government_None;",
+    "SystemGovernment_Localised": "None",
+    "SystemSecurity": "$GAlAXY_MAP_INFO_state_anarchy;",
+    "SystemSecurity_Localised": "Anarchy",
+    "Population": 0,
+    "Body": "Ogainks MH-D d12-8019 A",
+    "BodyID": 1,
+    "BodyType": "Star",
+    "JumpDist": 33.266,
+    "FuelUsed": 1.052714,
+    "FuelLevel": 110.541359
+}

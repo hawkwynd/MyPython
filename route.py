@@ -16,14 +16,16 @@ now = datetime.now()
 
 # Extract the month as an integer (1-12)
 current_month_number = now.month
+current_year = now.year 
+
 # Extract todays date day as an integer (1-31)
 current_day = now.day 
 current_day_with_leading_zero = now.strftime('%d')
-
+pretty_date = now.strftime('%m/%d/%y')
 # Journal.2025-11-18xxxxxxxx.log (limit to todays logs, else we're loading the whole months worth...)
 # JOURNAL_PREFIX = f"Journal.2025-{current_month_number}-{current_day}"
 
-JOURNAL_PREFIX = f"Journal.2025-{current_month_number}-{current_day_with_leading_zero}"
+JOURNAL_PREFIX = f"Journal.{current_year}-{current_month_number}-{current_day_with_leading_zero}"
 
 # The targeted biological genus.
 TARGET_GENUS = "Radicoida"
@@ -38,7 +40,7 @@ processed = set()
 # === DRAGGABLE OVERLAY ===
 def create_overlay():
     root = tk.Tk()
-    root.title("Genus Sampler for Radicoida")
+    root.title("Router")
     root.attributes("-topmost", True)
     root.overrideredirect(True)
     root.attributes("-alpha", 0.80)
@@ -50,7 +52,7 @@ def create_overlay():
     root.bind("<Escape>", lambda e: root.destroy())
 
     var = StringVar()
-    var.set( JOURNAL_PREFIX )
+    var.set( f"{pretty_date}\nWaiting for data" )
 
     label = tk.Label(
         root,
@@ -91,7 +93,9 @@ def scan_journals(var):
     JumpDist = 0
     StarClass = ""
     NextSystemName = ""
-    Population = 0
+    JumpTime = False
+    NextJump = False
+    
 
     while True:
 			
@@ -123,7 +127,7 @@ def scan_journals(var):
                             continue
 
                         ev = event.get("event")
-                       
+                                           
                         
                         # FSDTarget
                         if ev == "FSDTarget":
@@ -138,15 +142,25 @@ def scan_journals(var):
                         if ev == "FSDJump":
                              curSystem = event.get("StarSystem")
                              JumpDist = round( event.get("JumpDist") )
-                             Population = event.get("Population")
 											
+                        if ev == "CarrierJumpRequest":
+                            NextJump = event.get("SystemName")
+                            JumpTime = event.get("DepartureTime")
+
                         # === Update overlay text ===
-                        var.set(
-                            f"Location: {curSystem} ({JumpDist}ly)\n"
-                            f"Population: {Population}\n"
-                            f"Next: {NextSystemName} ({StarClass})\n"
-                            f"Jumps remaining: {jumpsRemaining}"
-                        )   
+                        if JumpDist > 0:
+                            var.set(
+                                f"Location: {curSystem} ({JumpDist}ly)\n"
+                                f"Next: {NextSystemName} ({StarClass})\n"
+                                f"Jumps remaining: {jumpsRemaining}"
+                            )   
+                        else:
+                            if JumpTime:
+                                var.set(
+                                    f"Carrier jump to: {NextJump}\n"
+                                    f"Schedule: {JumpTime}"
+                                )
+                        
 
             time.sleep(1)
 

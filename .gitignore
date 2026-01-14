@@ -3,3 +3,4 @@ gec_by_region/
 build/
 dist/
 *.spec
+*.db

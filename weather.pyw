@@ -64,10 +64,11 @@ os.makedirs(DATAFOLDER, exist_ok=True )
 # === DRAGGABLE OVERLAY ===
 def create_overlay():
     root = tk.Tk()
-    root.title("Weather Monitor")
-    root.attributes("-topmost", True)
+    root.title("Fleming Farm Weather")
+    # root.attributes("-topmost", True)
     root.overrideredirect(True)
-    root.attributes("-alpha", 0.80)
+    root.attributes("-alpha", 0.80) # 80% opaque
+    # root.attributes("-alpha", 1) 
 
     # Move overlay left so extra text fits
     root.geometry("+30+400")
@@ -81,11 +82,11 @@ def create_overlay():
     label = tk.Label(
         root,
         textvariable=var,
-        font=("Euro Caps", 12, "normal"),
-        fg="cyan",
+        font=("Tahoma", 14, "normal"),
+        fg="#A0F7B3",
         bg="black",
-        padx=40,      # widened
-        pady=20,
+        padx=60,      # widened
+        pady=40,
         justify="left",
         anchor="w",   # align text left
     )
@@ -146,8 +147,9 @@ def getWeather(var):
                     my_timezone     = pytz.timezone('America/Chicago')
                     date_chicago    = dt_object_utc.astimezone(my_timezone)
                     suffix = get_ordinal_suffix(date_chicago.day)
+
                     formatted_date  = date_chicago.strftime("%A, %b")
-                    formatted_time = date_chicago.strftime("%I:%M %p")
+                    formatted_time = date_chicago.strftime("%I:%M %p").lstrip("0")
                     formatted_date_with_suffix = f"{formatted_date} {date_chicago.day}{suffix} {formatted_time}"
 
                     # uv_index
@@ -159,13 +161,13 @@ def getWeather(var):
                     json.dump(data, f, indent=4) # indent for pretty-printing
                     
                     # print(f"JSON data saved to {output_json_filename} at {formatted_date} began {pretty_time}")
-                    todayRain = f"Rain Today: {dailyrainin} Hourly: {hourlyrainin} Now: { eventrainin }"
-
-                    sky_conditions = "Rain" if eventrainin > 0 else sky_conditions
+                    todayRain = f"Rain Today: {dailyrainin} Hourly: {hourlyrainin}"
+                    isItRaining = "raining" if hourlyrainin > 0 else ""
+                    sky_conditions = uv_index( lastData['uv'])
 
                     var.set(
-                        f"{formatted_date_with_suffix}\n"
-                        f"Sky: {sky_conditions}\n" 
+                        f"{formatted_date_with_suffix}\n\n"
+                        f"Sky: {sky_conditions} {isItRaining}\n" 
                         f"Temp: {round(lastData['tempf'])}\u00b0\n"
                         f"Wind: {windDirection} at { round(lastData['windspeedmph'])}mph\n"
                         f"Gust: { round(windgustmph)}mph Max: {round(lastData['maxdailygust'])}mph\n"

@@ -14,6 +14,9 @@ import pytz
 # create exe for distribution
 # python -m PyInstaller --noconsole --onefile .\weather.pyw
 
+# 10 minutes multiplied by 60 seconds per minute
+sleep_duration_seconds = 10 * 60 
+
 # Get the current datetime object
 now = datetime.now()
 # Extract the month as an integer (1-12)
@@ -85,8 +88,8 @@ def create_overlay():
         font=("Tahoma", 14, "normal"),
         fg="#A0F7B3",
         bg="black",
-        padx=60,      # widened
-        pady=40,
+        padx=40,      # widened
+        pady=20,
         justify="left",
         anchor="w",   # align text left
     )
@@ -146,38 +149,42 @@ def getWeather(var):
                     dt_object_utc   = datetime.fromisoformat(timestamp)
                     my_timezone     = pytz.timezone('America/Chicago')
                     date_chicago    = dt_object_utc.astimezone(my_timezone)
-                    suffix = get_ordinal_suffix(date_chicago.day)
-
+                    suffix          = get_ordinal_suffix(date_chicago.day)
                     formatted_date  = date_chicago.strftime("%A, %b")
                     formatted_time = date_chicago.strftime("%I:%M %p").lstrip("0")
                     formatted_date_with_suffix = f"{formatted_date} {date_chicago.day}{suffix} {formatted_time}"
+                
+                    # print(f"Getting data {formatted_time}")
 
                     # uv_index
                     sky_conditions = uv_index( lastData['uv'])
                 
-                output_json_filename = os.path.join(DATAFOLDER,'myweather.json')
+                # output_json_filename = os.path.join(DATAFOLDER,'myweather.json')
 
-                with open(output_json_filename, 'w') as f:
-                    json.dump(data, f, indent=4) # indent for pretty-printing
+                # with open(output_json_filename, 'w') as f:
+                #     json.dump(data, f, indent=4) # indent for pretty-printing
                     
-                    # print(f"JSON data saved to {output_json_filename} at {formatted_date} began {pretty_time}")
-                    todayRain = f"Rain Today: {dailyrainin} Hourly: {hourlyrainin}"
-                    isItRaining = "raining" if hourlyrainin > 0 else ""
-                    sky_conditions = uv_index( lastData['uv'])
+                # print(f"JSON data saved to {output_json_filename} at {formatted_date} began {pretty_time}")
 
-                    var.set(
-                        f"{formatted_date_with_suffix}\n\n"
-                        f"Sky: {sky_conditions} {isItRaining}\n" 
-                        f"Temp: {round(lastData['tempf'])}\u00b0\n"
-                        f"Wind: {windDirection} at { round(lastData['windspeedmph'])}mph\n"
-                        f"Gust: { round(windgustmph)}mph Max: {round(lastData['maxdailygust'])}mph\n"
-                        f"Humidity: {humidity}%\n"
-                        f"{todayRain}"
-                        )
+                todayRain = f"Rain Today: {dailyrainin} Hourly: {hourlyrainin}"
+                isItRaining = "raining" if hourlyrainin > 0 else ""
+                sky_conditions = uv_index( lastData['uv'])
 
-                
-                # repeat every 15 minutes = 900
-                time.sleep( 300 )
+                var.set(
+                    f"{formatted_date_with_suffix}\n\n"
+                    f"Sky: {sky_conditions} {isItRaining}\n" 
+                    f"Temp: {round(lastData['tempf'])}\u00b0\n"
+                    f"Wind: {windDirection} at { round(lastData['windspeedmph'])}mph\n"
+                    f"Gust: { round(windgustmph)}mph Max: {round(lastData['maxdailygust'])}mph\n"
+                    f"Humidity: {humidity}%\n"
+                    f"{todayRain}"
+                    )
+
+                # print(f"sleeping for {sleep_duration_seconds} seconds")
+                time.sleep( sleep_duration_seconds )
+                # print('root.after 1000')
+                # repeat getWeather function after 1000 milliseconds (1 sec)
+                root.after(1000, getWeather(var))
 
             else:
 
@@ -217,17 +224,11 @@ def uv_index( uv_index ):
         return "UV data not found in measurement"
 
 
-
-
-
-
 # Run it all man.
 
 if __name__ == "__main__":
+
     root, var = create_overlay()
-
     t = threading.Thread( target=getWeather, args=(var,), daemon=True)
-
     t.start()
-    
     root.mainloop()

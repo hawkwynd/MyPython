@@ -32,6 +32,51 @@ apiKey          = "d1f8d26f2a1347488a757da2e6011989b45884dd5df14b70bf4106480bd25
 applicationKey  = "3d6e4c73c0c4420aa1043ae70892357a4d1200e7604543faa3b089a95a7d37ef"
 userUrl         = f"https://rt.ambientweather.net/v1/devices?applicationKey={applicationKey}&apiKey={apiKey}"
 
+sunrise = None
+sunset  = None
+day_length = None 
+
+
+
+
+def getSunriseSunset():
+  
+  lat = 36.5684
+  lng = -86.3786
+ 
+  sunRiseApiUrl = f"https://api.sunrise-sunset.org/json?lat={lat}&lng={lng}&date=today&tzid=America/Chicago"
+
+  global sunrise
+  global sunset
+  global day_length
+
+
+  try:
+      response = requests.get(sunRiseApiUrl)
+      
+      if response.status_code == 200:
+
+        data = response.json()
+
+        
+        if data['status'] == "OK":
+               
+               sunrise = data['results']['sunrise']
+               sunset  = data['results']['sunset']
+               day_length = data['results']['day_length']
+        else:
+            print("You fucked it up")
+
+      else:
+        print(f"Error: request failure with status code {response.status_code}")
+        print(f"Response text: {response.text}")
+        time.sleep(10)
+
+  except  requests.exceptions.RequestException as e:
+                print(f"An error was discovered during the request: {e}")
+          
+
+
 # Wind Directions
 windDirs = ['North', 'NNE', 'NE', 'ENE', 'East', 'ESE', 'SE', 'SSE', 'South', 'SSW', 'SW', 'WSW', 'West', 'WNW', 'NW', 'NNW']
 
@@ -126,6 +171,7 @@ def getWeather(var):
                 data = response.json()
 
                 for item in data:
+                     
                     # Access specific values using keys
                     macAddress  = item['macAddress']
                     lastData    = item['lastData']
@@ -177,7 +223,9 @@ def getWeather(var):
                     f"Wind: {windDirection} at { round(lastData['windspeedmph'])}mph\n"
                     f"Gust: { round(windgustmph)}mph Max: {round(lastData['maxdailygust'])}mph\n"
                     f"Humidity: {humidity}%\n"
-                    f"{todayRain}"
+                    f"{todayRain}\n"
+                    f"Sunrise:{sunrise}\nSunset:{sunset}\n"
+                    f"Daylight:{day_length}"
                     )
 
                 # print(f"sleeping for {sleep_duration_seconds} seconds")
@@ -226,7 +274,11 @@ def uv_index( uv_index ):
 
 # Run it all man.
 
+
 if __name__ == "__main__":
+
+    # capture sunrise, sunset, day_length from free api
+    getSunriseSunset()
 
     root, var = create_overlay()
     t = threading.Thread( target=getWeather, args=(var,), daemon=True)

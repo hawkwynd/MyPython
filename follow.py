@@ -3,7 +3,7 @@ import os
 import json
 
 JOURNAL_FOLDER = os.path.expanduser("~/Saved Games/Frontier Developments/Elite Dangerous/")
-JOURNAL_PREFIX = f"Journal.2025-12-22"
+JOURNAL_PREFIX = f"Journal.2026-01-18"
 
 files = [
             f for f in os.listdir( JOURNAL_FOLDER )

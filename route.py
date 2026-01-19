@@ -37,6 +37,19 @@ commanders = {}
 # Track processed lines
 processed = set()
 
+# array of scoopable stars
+scoopableStarTypes = ['O', 'B', 'A', 'F', 'G', 'K', 'M' ]
+
+def follow(thefile):
+    # Seek to the end of the file
+    thefile.seek(0, 2)
+    while True:
+        line = thefile.readline()
+        if not line:
+            # Sleep briefly when no new data is found
+            time.sleep(0.1)
+            continue
+        yield line
 
 # === DRAGGABLE OVERLAY ===
 def create_overlay():
@@ -112,10 +125,12 @@ def scan_journals(var):
             for fname in files:
                 path = os.path.join(JOURNAL_FOLDER, fname)
                 with open(path, "r", encoding="utf-8") as f:
-                    for raw in f:
-                        if raw in processed:
-                            continue
-                        processed.add(raw)
+                    loglines = follow(f)
+                    
+                    for raw in loglines:
+                        # if raw in processed:
+                        #     continue
+                        # processed.add(raw)
 
                         line = raw.strip()
                         if not line.startswith("{"):
@@ -123,7 +138,6 @@ def scan_journals(var):
 
                         try:
                             event = json.loads(line)
-                            
 
                         except:
                             continue
@@ -151,6 +165,7 @@ def scan_journals(var):
                             NextSystemName = event.get("Name")
                             # print(NextSystemName)
                             StarClass = event.get("StarClass")
+                            scoopable = "*" if StarClass in scoopableStarTypes else ""
 
 
                         # === grab system name when jumping into it ===
@@ -167,7 +182,7 @@ def scan_journals(var):
                         if JumpDist > 0:
                             var.set(
                                 f"Location: {curSystem} ({JumpDist}ly)\n"
-                                f"Next: {NextSystemName} ({StarClass})\n"
+                                f"Next: {NextSystemName} ({StarClass}) {scoopable}\n"
                                 f"Jumps remaining: {jumpsRemaining}"
                             )   
                         else:

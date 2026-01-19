@@ -1,5 +1,6 @@
 import os
 import json
+import requests
 import time
 import threading
 import tkinter as tk
@@ -15,7 +16,7 @@ JOURNAL_FOLDER = os.path.expanduser(
 now = datetime.now()
 
 # Extract the month as an integer (1-12)
-current_month_number = now.month
+current_month_number = now.strftime('%m')
 current_year = now.year 
 
 # Extract todays date day as an integer (1-31)
@@ -95,7 +96,7 @@ def scan_journals(var):
     NextSystemName = ""
     JumpTime = False
     NextJump = False
-    
+    ThisSystem = None 
 
     while True:
 			
@@ -110,7 +111,6 @@ def scan_journals(var):
 
             for fname in files:
                 path = os.path.join(JOURNAL_FOLDER, fname)
-
                 with open(path, "r", encoding="utf-8") as f:
                     for raw in f:
                         if raw in processed:
@@ -123,11 +123,26 @@ def scan_journals(var):
 
                         try:
                             event = json.loads(line)
+                            
+
                         except:
                             continue
 
                         ev = event.get("event")
-                                           
+
+
+                        if ev == "FSSAllBodiesFound" or ev == "FSSDiscoveryScan" and ThisSystem == None:
+                            
+                            sn = event.get("SystemName")
+                            url = f"https://www.afourthdimension.com/projects/eliteDangerous/edsm/results.php?sysName={event.get("SystemName")}"
+                            response = requests.get(url)
+                            
+                            if response.status_code == 200:
+                                print(f'FSSAllBodiesFound sent request for {sn}')
+                                ThisSystem = event.get("SystemName")
+
+                            else:
+                                print(response.status_code)
                         
                         # FSDTarget
                         if ev == "FSDTarget":
@@ -140,6 +155,7 @@ def scan_journals(var):
 
                         # === grab system name when jumping into it ===
                         if ev == "FSDJump":
+                             jumpsRemaining = (jumpsRemaining -1) if jumpsRemaining == 1 else jumpsRemaining
                              curSystem = event.get("StarSystem")
                              JumpDist = round( event.get("JumpDist") )
 											
@@ -162,7 +178,7 @@ def scan_journals(var):
                                 )
                         
 
-            time.sleep(1)
+            time.sleep(2)
 
         except Exception as e:
             print("Error:", e)

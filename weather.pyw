@@ -7,6 +7,7 @@ import tkinter as tk
 from tkinter import StringVar
 from datetime import datetime
 import pytz
+import ambient_config
 
 # Shortcut target 
 # "pythonw.exe" C:\Users\hawkw\projects\MyPython\weather.pyw"
@@ -15,7 +16,7 @@ import pytz
 # python -m PyInstaller --noconsole --onefile .\weather.pyw
 
 # 10 minutes multiplied by 60 seconds per minute
-sleep_duration_seconds = 10 * 60 
+sleep_duration_seconds = 1 * 60 
 
 # Get the current datetime object
 now = datetime.now()
@@ -28,9 +29,10 @@ current_day_with_leading_zero = now.strftime('%d')
 pretty_date = now.strftime('%m/%d/%y %I:%M')
 pretty_time = now.strftime('%I:%M')
 
-apiKey          = "d1f8d26f2a1347488a757da2e6011989b45884dd5df14b70bf4106480bd25440"
-applicationKey  = "3d6e4c73c0c4420aa1043ae70892357a4d1200e7604543faa3b089a95a7d37ef"
-userUrl         = f"https://rt.ambientweather.net/v1/devices?applicationKey={applicationKey}&apiKey={apiKey}"
+# Move this to an external file for configuration
+apiKey          = ambient_config.apiKey
+applicationKey  = ambient_config.applicationKey
+userUrl         = ambient_config.userUrl
 
 sunrise = None
 sunset  = None
@@ -57,16 +59,11 @@ def getSunriseSunset():
       if response.status_code == 200:
 
         data = response.json()
-
-        
         if data['status'] == "OK":
                
                sunrise = data['results']['sunrise']
                sunset  = data['results']['sunset']
                day_length = data['results']['day_length']
-        else:
-            print("You fucked it up")
-
       else:
         print(f"Error: request failure with status code {response.status_code}")
         print(f"Response text: {response.text}")
@@ -113,8 +110,8 @@ os.makedirs(DATAFOLDER, exist_ok=True )
 def create_overlay():
     root = tk.Tk()
     root.title("Fleming Farm Weather")
-    # root.attributes("-topmost", True)
-    root.overrideredirect(True)
+    root.attributes("-topmost", True)
+    root.overrideredirect( True )
     root.attributes("-alpha", 0.80) # 80% opaque
     # root.attributes("-alpha", 1) 
 
@@ -125,13 +122,13 @@ def create_overlay():
     root.bind("<Escape>", lambda e: root.destroy())
 
     var = StringVar()
-    var.set( f"{pretty_date}\nWaiting for data" )
+    var.set( f"{pretty_date}\nLoading data" )
 
     label = tk.Label(
         root,
         textvariable=var,
         font=("Tahoma", 14, "normal"),
-        fg="#A0F7B3",
+        fg="#E9F7EC",
         bg="black",
         padx=40,      # widened
         pady=20,
@@ -159,6 +156,7 @@ def create_overlay():
 
 
 def getWeather(var):
+    
     
     while True:
        
@@ -200,39 +198,44 @@ def getWeather(var):
                     formatted_time = date_chicago.strftime("%I:%M %p").lstrip("0")
                     formatted_date_with_suffix = f"{formatted_date} {date_chicago.day}{suffix} {formatted_time}"
                 
-                    # print(f"Getting data {formatted_time}")
+                    print(f"Fetching weather at {formatted_time}")
 
+                    lastData['sunrise'] = sunrise
+                    lastData['sunset'] = sunset
+                    lastData['day_length'] = day_length
+                    lastData['time_tick'] = formatted_time
+                    
                     # uv_index
                     sky_conditions = uv_index( lastData['uv'])
                 
-                # output_json_filename = os.path.join(DATAFOLDER,'myweather.json')
+                
+                output_json_filename = os.path.join(DATAFOLDER,'myweather.json')
 
-                # with open(output_json_filename, 'w') as f:
-                #     json.dump(data, f, indent=4) # indent for pretty-printing
+                with open(output_json_filename, 'w') as f:
+                    json.dump(data, f, indent=4) # indent for pretty-printing
                     
-                # print(f"JSON data saved to {output_json_filename} at {formatted_date} began {pretty_time}")
-
-                todayRain = f"Rain Today: {dailyrainin} Hourly: {hourlyrainin}"
+                todayRain = f"Rain: {dailyrainin} Hourly: {hourlyrainin}"
                 isItRaining = "raining" if hourlyrainin > 0 else ""
                 sky_conditions = uv_index( lastData['uv'])
 
                 var.set(
+                    f"{item['info']['name']} weather\n"
                     f"{formatted_date_with_suffix}\n\n"
                     f"Sky: {sky_conditions} {isItRaining}\n" 
-                    f"Temp: {round(lastData['tempf'])}\u00b0\n"
+                    f"Temp: {round(lastData['tempf'])}\u00b0 Feels Like: {round(lastData['feelsLike'])}\u00b0\n"
                     f"Wind: {windDirection} at { round(lastData['windspeedmph'])}mph\n"
                     f"Gust: { round(windgustmph)}mph Max: {round(lastData['maxdailygust'])}mph\n"
                     f"Humidity: {humidity}%\n"
                     f"{todayRain}\n"
-                    f"Sunrise:{sunrise}\nSunset:{sunset}\n"
-                    f"Daylight:{day_length}"
+                    f"Sunrise: {sunrise}\nSunset: {sunset}\n"
+                    f"Daylight: {day_length}"
                     )
 
                 # print(f"sleeping for {sleep_duration_seconds} seconds")
                 time.sleep( sleep_duration_seconds )
                 # print('root.after 1000')
                 # repeat getWeather function after 1000 milliseconds (1 sec)
-                root.after(1000, getWeather(var))
+                # root.after(1000, getWeather(var))
 
             else:
 
